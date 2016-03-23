@@ -1,0 +1,33 @@
+{
+  "name": "satellite-tracker",
+  "description": "3D Elektro-L Tracker app",
+  "main": "",
+  "authors": [
+    "Aleksey Maslakov"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "elektro",
+    "elektro-l",
+    "sattelite",
+    "tracking",
+    "NORAD",
+    "tle",
+    "sgp4"
+  ],
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "satellite.js": "~1.2.0",
+    "three.js": "~0.73.0",
+    "jquery": "~2.1.4",
+    "threejs-trackball-controls": "*"
+  }
+}
