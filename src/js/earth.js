@@ -17,7 +17,8 @@ TRACKER.earth = (function() {
     };
 
     var diffuse = THREE.ImageUtils.loadTexture('/src/images/diffuse-low.jpg'),
-        diffuseNight = THREE.ImageUtils.loadTexture('/src/images/diffuse-night-low.jpg');
+        diffuseNight = THREE.ImageUtils.loadTexture('/src/images/diffuse-night-low.jpg'),
+        diffuseSpecular = THREE.ImageUtils.loadTexture('/src/images/diffuse-specular-low.png');
 
     var uniforms = {
         v3LightPosition: {
@@ -106,6 +107,10 @@ TRACKER.earth = (function() {
             type: "t",
             value: diffuseNight
         },
+        tDiffuseSpecular: {
+                type: "t",
+                value: diffuseSpecular
+        },
         tDisplacement: {
             type: "t",
             value: 0
@@ -117,6 +122,14 @@ TRACKER.earth = (function() {
         fNightScale: {
             type: "f",
             value: 1
+        },
+        fSpecularScale: {
+            type: "f",
+            value: 1
+        },
+        fSpecularSize: {
+            type: "f",
+            value: 25
         }
     };
 

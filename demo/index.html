@@ -16,69 +16,6 @@
     <div id="scene"></div>
 
 
-
-
-    <script id="fragmentShader" type="x-shader/x-fragment">
-        uniform sampler2D dayTexture;
-        uniform sampler2D nightTexture;
-        uniform sampler2D specularTexture;
-        uniform vec3 sunDirection;
-        uniform vec3 specularDirection;
-        varying vec3 vNormal;
-        varying vec2 vUv;
-        void main() {
-            // Textures for day and night:
-            vec3 dayColor       = texture2D( dayTexture, vUv ).xyz;
-            vec3 nightColor     = texture2D( nightTexture, vUv ).xyz;
-
-
-            /* mix day and night texture */
-            // compute cosine sun to normal so -1 is away from sun and +1 is toward sun.
-            float cosineAngleSunToNormal = dot(normalize(vNormal), sunDirection);
-
-            // sharpen the edge beween the transition
-            cosineAngleSunToNormal = clamp( cosineAngleSunToNormal * 3.0, -1.0, 1.0);
-
-            // convert to 0 to 1 for mixing
-            float mixAmount = cosineAngleSunToNormal * 0.5 + 0.5;
-            vec3 specularColor  = vec3(1.0,1.0,1.0);
-            vec3 color = mix(dayColor, nightColor, mixAmount);
-
-            // Specular:
-            vec3 specularAmount = texture2D( specularTexture, vUv ).xyz;
-
-            // Play with these parameters to adjust the specular:
-            float c = 0.70;    // Size, I guess...
-            float p = 30.0;     // Blur
-            float mixAmountSpecular = pow(c * dot(normalize(vNormal), sunDirection), p) * (specularAmount.z * 0.5);
-
-            // Select day or night texture based on mixAmount.
-            color = mix(dayColor, specularColor + color, mixAmountSpecular);
-            color = mix( nightColor, color, mixAmount );
-
-            // Set the color
-            gl_FragColor = vec4(color, 1.0);
-        }
-    </script>
-
-
-    <script id="vertexShader" type="x-shader/x-vertex">
-        varying vec2 vUv;
-        varying vec3 vNormal;
-
-        void main() {
-            // set the vNormal value with the attribute value passed in by Three.js
-            vUv = uv;
-            vNormal = normal;
-
-            gl_Position = projectionMatrix *
-                          modelViewMatrix *
-                          vec4(position,1.0);
-        }
-    </script>
-
-
-
     <script id="vertexGround" type="x-shader/x-vertex">
         //
         // Atmospheric scattering vertex shader
@@ -170,11 +107,9 @@
             c0 = v3Attenuate;
             c1 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);
 
-          gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-            //gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
-            //gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
-          vUv = uv;
-          vNormal = normal;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            vUv = uv;
+            vNormal = normal;
         }
     </script>
 
@@ -188,13 +123,13 @@
         //
         // Ported for use with three.js/WebGL by James Baicoianu
 
-        //uniform sampler2D s2Tex1;
-        //uniform sampler2D s2Tex2;
-
         uniform float fNightScale;
+        uniform float fSpecularScale;
+        uniform float fSpecularSize;
         uniform vec3 v3LightPosition;
         uniform sampler2D tDiffuse;
         uniform sampler2D tDiffuseNight;
+        uniform sampler2D tDiffuseSpecular;
 
         varying vec3 c0;
         varying vec3 c1;
@@ -203,19 +138,18 @@
 
         void main (void)
         {
-            //gl_FragColor = vec4(c0, 1.0);
-            //gl_FragColor = vec4(0.25 * c0, 1.0);
-            //gl_FragColor = gl_Color + texture2D(s2Tex1, gl_TexCoord[0].st) * texture2D(s2Tex2, gl_TexCoord[1].st) * gl_SecondaryColor;
-
-
             vec3 diffuseTex = texture2D( tDiffuse, vUv ).xyz;
             vec3 diffuseNightTex = texture2D( tDiffuseNight, vUv ).xyz;
+            vec3 diffuseSpecularTex = texture2D(tDiffuseSpecular, vUv).xyz;
+
+            float specularMix = pow(fSpecularScale * dot(normalize(vNormal), v3LightPosition), fSpecularSize) *
+                                    (diffuseSpecularTex.z * 0.5);
 
             vec3 day = diffuseTex * c0;
             vec3 night = fNightScale * diffuseNightTex * diffuseNightTex * diffuseNightTex * (1.0 - c0);
+            vec3 specular = diffuseSpecularTex * specularMix * c0;
 
-            gl_FragColor = vec4(c1, 1.0) + vec4(day + night, 1.0);
-
+            gl_FragColor = vec4(c1, 1.0) + vec4(day + night + specular, 1.0);
         }
     </script>
 
@@ -280,15 +214,12 @@
         	float fStartAngle = dot(v3Ray, v3Start) / fOuterRadius;
         	float fStartDepth = exp(-1.0 / fScaleDepth);
         	float fStartOffset = fStartDepth * scale(fStartAngle);
-        	//c0 = vec3(1.0, 0, 0) * fStartAngle;
 
         	// Initialize the scattering loop variables
         	float fSampleLength = fFar / fSamples;
         	float fScaledLength = fSampleLength * fScale;
         	vec3 v3SampleRay = v3Ray * fSampleLength;
         	vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;
-
-        	//gl_FrontColor = vec4(0.0, 0.0, 0.0, 0.0);
 
         	// Now loop through the sample rays
         	vec3 v3FrontColor = vec3(0.0, 0.0, 0.0);

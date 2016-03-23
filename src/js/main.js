@@ -1,3 +1,5 @@
+'use strict';
+
 $(document).ready(function() {
 	var webglEl = document.getElementById('scene');
 
@@ -27,13 +29,17 @@ $(document).ready(function() {
 	debugaxis(200);
 	render();
 
+	var f = 0,
+		g = 0;
+
 	function render() {
 		controls.update();
         requestAnimationFrame(render);
 
         var cameraHeight, euler, eye, light, matrix, vector;
-        var f = 0.0002;
-        var g = 0.008;
+		// uncomment for day/night changing
+        // f += 0.0002;
+    	// g += 0.008;
         vector = new THREE.Vector3(1, 0, 0);
         euler = new THREE.Euler(f, g, 0);
         matrix = new THREE.Matrix4().makeRotationFromEuler(euler);
