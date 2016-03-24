@@ -6,18 +6,20 @@ $(document).ready(function() {
 	var width  = window.innerWidth,
 		height = window.innerHeight;
 
-    var earth = TRACKER.earth;
+    var earth = TRACKER.earth,
+		sun = TRACKER.sun;
 
 	var scene = new THREE.Scene();
     scene.add(earth.ground.mesh);
     scene.add(earth.sky.mesh);
+	scene.add(sun.lensFlare);
 
 
-	var camera = new THREE.PerspectiveCamera(70, width / height, 0.1, 1000);
-	camera.position.set(0, 300, 300);
+	var camera = new THREE.PerspectiveCamera(70, width / height, 1, 15000);
+	camera.position.set(5600, 5300, 500);
 	camera.up = new THREE.Vector3( 0, 0, 1 );
 
-	var renderer = new THREE.WebGLRenderer({ antialias: true });
+	var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true});
 	renderer.setPixelRatio(window.devicePixelRatio || 1);
 	renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 1);
@@ -27,7 +29,7 @@ $(document).ready(function() {
     var controls = new THREE.TrackballControls(camera);
 
 	var debugaxis = axes;
-	debugaxis(200);
+	// debugaxis(200);
 	render();
 
 	var f = 0,
