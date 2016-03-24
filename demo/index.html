@@ -98,7 +98,7 @@
                 float fHeight = length(v3SamplePoint);
                 float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
                 float fScatter = fDepth*fTemp - fCameraOffset;
-                v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI));
+                v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI)) / 1.1;
                 v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
                 v3SamplePoint += v3SampleRay;
             }

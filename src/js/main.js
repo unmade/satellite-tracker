@@ -12,8 +12,9 @@ $(document).ready(function() {
     scene.add(earth.ground.mesh);
     scene.add(earth.sky.mesh);
 
+
 	var camera = new THREE.PerspectiveCamera(70, width / height, 0.1, 1000);
-	camera.position.set(200, 0, 0);
+	camera.position.set(0, 300, 300);
 	camera.up = new THREE.Vector3( 0, 0, 1 );
 
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -36,19 +37,9 @@ $(document).ready(function() {
 		controls.update();
         requestAnimationFrame(render);
 
-        var cameraHeight, euler, eye, light, matrix, vector;
-		// uncomment for day/night changing
-        // f += 0.0002;
-    	// g += 0.008;
-        vector = new THREE.Vector3(1, 0, 0);
-        euler = new THREE.Euler(f, g, 0);
-        matrix = new THREE.Matrix4().makeRotationFromEuler(euler);
-        light = vector.applyMatrix4(matrix);
-        cameraHeight = camera.position.length();
-        earth.sky.material.uniforms.v3LightPosition.value = light;
+        var cameraHeight = camera.position.length();
         earth.sky.material.uniforms.fCameraHeight.value = cameraHeight;
         earth.sky.material.uniforms.fCameraHeight2.value = cameraHeight * cameraHeight;
-        earth.ground.material.uniforms.v3LightPosition.value = light;
         earth.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         earth.ground.material.uniforms.fCameraHeight2.value = cameraHeight * cameraHeight;
         return renderer.render(scene, camera);

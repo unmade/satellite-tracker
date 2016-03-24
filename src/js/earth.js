@@ -10,15 +10,15 @@ TRACKER.earth = (function() {
         ESun: 20.0,
         g: -0.950,
         innerRadius: 100.0,
-        outerRadius: 102.5,
-        wavelength: [0.650, 0.570, 0.475],
+        outerRadius: 101.5,
+        wavelength: [0.550, 0.50, 0.475],
         scaleDepth: 0.25,
         mieScaleDepth: 0.1
     };
-
-    var diffuse = THREE.ImageUtils.loadTexture('/src/images/diffuse-low.jpg'),
-        diffuseNight = THREE.ImageUtils.loadTexture('/src/images/diffuse-night-low.jpg'),
-        diffuseSpecular = THREE.ImageUtils.loadTexture('/src/images/diffuse-specular-low.png');
+    var textureLoader = new THREE.TextureLoader(),
+        diffuse = textureLoader.load('/src/images/earth/diffuse-low.jpg'),
+        diffuseNight = textureLoader.load('/src/images/earth/diffuse-night-low.jpg'),
+        diffuseSpecular = textureLoader.load('/src/images/earth/diffuse-specular-low.png');
 
     var uniforms = {
         v3LightPosition: {
@@ -143,6 +143,7 @@ TRACKER.earth = (function() {
         })
     };
     ground.mesh = new THREE.Mesh(ground.geometry, ground.material);
+
 
     var sky = {
         geometry: new THREE.SphereGeometry(atmosphere.outerRadius, 500, 500),
