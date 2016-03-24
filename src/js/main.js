@@ -7,15 +7,16 @@ $(document).ready(function() {
 		height = window.innerHeight;
 
     var earth = TRACKER.earth,
-		sun = TRACKER.sun;
+		sun = TRACKER.sun,
+		milkyway = TRACKER.milkyway;
 
 	var scene = new THREE.Scene();
     scene.add(earth.ground.mesh);
     scene.add(earth.sky.mesh);
 	scene.add(sun.lensFlare);
+	scene.add(milkyway.milkyway);
 
-
-	var camera = new THREE.PerspectiveCamera(70, width / height, 1, 15000);
+	var camera = new THREE.PerspectiveCamera(90, width / height, 1, 1e5);
 	camera.position.set(5600, 5300, 500);
 	camera.up = new THREE.Vector3( 0, 0, 1 );
 

@@ -19,7 +19,7 @@ TRACKER.sun = (function() {
 		light = new THREE.PointLight( 0xffffff, 1.5, 2000 );
 		light.color.setHSL( h, s, l );
 		light.position.set( x, y, z );
-        
+
 		var flareColor = new THREE.Color( 0xffffff );
 		flareColor.setHSL( h, s, l + 0.5 );
 		lensFlare = new THREE.LensFlare( textureFlare0, 350, 0.0, THREE.AdditiveBlending, flareColor );
