@@ -44,3 +44,6 @@ Desktop.ini
 # bower_components
 bower_components
 node_modules
+
+# project
+elektro.obj

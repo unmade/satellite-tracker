@@ -1,24 +1,62 @@
-'use strict';
-
 $(document).ready(function() {
+	'use strict';
 	var webglEl = document.getElementById('scene');
 
 	var width  = window.innerWidth,
 		height = window.innerHeight;
 
+	var tle = {
+		elektro1: {
+			"line1": "1 37344U 11001A   16084.50580970  .00000000  00000-0  10000-3 0  9991",
+			"line2": "2 37344   1.5394  79.7599 0005633 181.1213 179.7726  1.00271467 19002"
+		},
+		elektro2: {
+			"line1": "1 41105U 15074A   16084.53509896 -.00000132  00000-0  00000+0 0  9998",
+			"line2": "2 41105   0.2604 277.8149 0001219 144.5680  30.4420  1.00273958  1058"
+		}
+	};
+
+	var scale = 63.71;
+
     var earth = TRACKER.earth,
 		sun = TRACKER.sun,
-		milkyway = TRACKER.milkyway;
+		milkyway = TRACKER.milkyway,
+		elektro1 = new TRACKER.Satellite(tle.elektro1, scale),
+		elektro2 = new TRACKER.Satellite(tle.elektro2, scale);
 
 	var scene = new THREE.Scene();
     scene.add(earth.ground.mesh);
     scene.add(earth.sky.mesh);
 	scene.add(sun.lensFlare);
-	scene.add(milkyway.milkyway);
+	scene.add(sun.light);
+	scene.add(new THREE.AmbientLight(0x333333));
+
+	$.when(
+		elektro1.loadObj('/src/obj/elektro.obj'),
+		elektro2.loadObj('/src/obj/elektro.obj')
+	)
+	.then(function() {
+		var now = new Date(),
+			position;
+		elektro1.object.scale.set(1e-3, 1e-3, 1e-3);
+		position = elektro1.propagate(now);
+
+		elektro2.object.scale.set(1e-3, 1e-3, 1e-3);
+		elektro2.propagate(now);
+
+		scene.add(elektro1.object);
+		scene.add(elektro2.object);
+
+		camera.position.copy(position).multiplyScalar(1.05);
+		earth.ground.material.uniforms.v3LightPosition.value.copy(position).normalize();
+		sun.lensFlare.position.copy(position).multiplyScalar(1e1);
+		sun.light.position.copy(position).multiplyScalar(1e1);
+		render();
+	});
 
 	var camera = new THREE.PerspectiveCamera(90, width / height, 1, 1e5);
-	camera.position.set(5600, 5300, 500);
-	camera.up = new THREE.Vector3( 0, 0, 1 );
+	camera.position.set(300, 50, -150);
+	camera.up = new THREE.Vector3( 0, 1, 0 );
 
 	var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true});
 	renderer.setPixelRatio(window.devicePixelRatio || 1);
@@ -26,15 +64,13 @@ $(document).ready(function() {
     renderer.setClearColor(0x000000, 1);
     webglEl.appendChild(renderer.domElement);
 
-
     var controls = new THREE.TrackballControls(camera);
+	controls.minDistance = 300;
+	controls.maxDistance = 1e5;
 
-	var debugaxis = axes;
-	// debugaxis(200);
-	render();
-
-	var f = 0,
-		g = 0;
+	// x: red, y: green, z: blue
+	var axisHelper = new THREE.AxisHelper( 1000 );
+	// scene.add( axisHelper );
 
 	function render() {
 		controls.update();
@@ -45,28 +81,9 @@ $(document).ready(function() {
         earth.sky.material.uniforms.fCameraHeight2.value = cameraHeight * cameraHeight;
         earth.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         earth.ground.material.uniforms.fCameraHeight2.value = cameraHeight * cameraHeight;
+
         return renderer.render(scene, camera);
 	}
-
-	function axes(axisLength){
-		function v(x,y,z){
-			return new THREE.Vector3(x,y,z);
-		}
-
-		// Create axis (point1, point2, colour)
-		// {x: red, y: green, z: blue}
-		function createAxis(p1, p2, color){
-			var line, lineGeometry = new THREE.Geometry(),
-			lineMat = new THREE.LineBasicMaterial({color: color});
-			lineGeometry.vertices.push(p1, p2);
-			line = new THREE.Line(lineGeometry, lineMat);
-			scene.add(line);
-		}
-
-		createAxis(v(-axisLength, 0, 0), v(axisLength, 0, 0), 0xFF0000);
-		createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
-		createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
-	};
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;

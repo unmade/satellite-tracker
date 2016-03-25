@@ -16,8 +16,7 @@ TRACKER.sun = (function() {
     addLight( 0.55, 0.9, 0.5, 5000, 0, 5000 );
 
 	function addLight( h, s, l, x, y, z ) {
-		light = new THREE.PointLight( 0xffffff, 1.5, 2000 );
-		light.color.setHSL( h, s, l );
+		light = new THREE.DirectionalLight( 0xffffff, 1 );
 		light.position.set( x, y, z );
 
 		var flareColor = new THREE.Color( 0xffffff );

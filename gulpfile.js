@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     sourcemaps = require("gulp-sourcemaps");
 
 var paths = {
-    scripts: ['src/js/module.js', 'src/js/*.js', 'src/js/main.js']
+    scripts: ['src/js/module.js', 'src/js/utils.js', 'src/js/*.js', 'src/js/main.js']
 };
 
 
