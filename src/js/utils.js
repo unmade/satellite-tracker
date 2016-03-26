@@ -3,20 +3,35 @@ TRACKER.namespace('utils');
 TRACKER.utils = (function() {
     'use strict';
 
-    function defferedOBJLoader(staticData, name, url)
+    return {
+        defferedOBJLoader: defferedOBJLoader,
+        defferedTextureLoader: defferedTextureLoader
+    }
+
+
+    function defferedOBJLoader(obj, name, url)
     {
         var defer = $.Deferred();
         var loader = new THREE.OBJLoader();
         loader.load(url, function ( event ) {
-            staticData[name] = event;
+            obj[name] = event;
             defer.resolve();
         });
 
         return defer;
     }
 
-    return {
-        defferedOBJLoader: defferedOBJLoader,
-        defferedTextureLoader: undefined
+
+    function defferedTextureLoader(obj, name, url)
+    {
+        var defer = $.Deferred();
+        var loader = new THREE.TextureLoader();
+        loader.load(url, function ( event ) {
+            obj[name] = event;
+            defer.resolve();
+        });
+
+        return defer;
     }
+
 })();

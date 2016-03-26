@@ -7,9 +7,9 @@ TRACKER.Satellite = (function() {
         omega = 2*Math.PI/86164.09,
         Satellite;
 
-    Satellite = function(tle, scale) {
+    Satellite = function(tle, scale, object3d) {
         this.axis = new THREE.Vector3(0, 1, 0);
-        this.object = null;
+        this.object3d = object3d;
         this.satrec = satellite.twoline2satrec(tle.line1, tle.line2);
         this.scale = scale;
     };
@@ -28,13 +28,13 @@ TRACKER.Satellite = (function() {
         return new THREE.Vector3(position.x, position.z, -position.y).divideScalar(this.scale);
     };
 
-    Satellite.prototype.loadObj = function(url) {
-        return utils.defferedOBJLoader(this, "object", url);
+    Satellite.prototype.setObj = function(obj) {
+        this.object3d = obj;
     };
 
     Satellite.prototype.propagate = function(date, gmst) {
         var position = this.terraPosition(date, gmst);
-        this.object.position.copy(position);
+        this.object3d.position.copy(position);
 
         return position;
     }

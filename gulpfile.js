@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    gulpUtil = require('gulp-util'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     sourcemaps = require("gulp-sourcemaps");
@@ -11,7 +12,7 @@ var paths = {
 gulp.task('app-scripts', function() {
     return gulp.src(paths.scripts)
         .pipe(sourcemaps.init())
-        .pipe(uglify())
+        .pipe(uglify().on('error', gulpUtil.log))
         .pipe(concat('elektro-tracker.min.js'))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist'));
