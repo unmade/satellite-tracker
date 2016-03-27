@@ -3,8 +3,8 @@ TRACKER.namespace('Satellite');
 TRACKER.Satellite = (function() {
     'use strict';
 
-    var utils = TRACKER.utils,
-        omega = 2*Math.PI/86164.09,
+    var Const = TRACKER.utils.Constants,
+        CoordConverter = TRACKER.utils.CoordinateConverter,
         Satellite;
 
     Satellite = function(tle, scale, object3d) {
@@ -14,8 +14,12 @@ TRACKER.Satellite = (function() {
         this.scale = scale;
     };
 
-    Satellite.prototype.fixPosition = function(date) {
-        var position = satellite.propagate(
+    Satellite.prototype.setObj = function(obj) {
+        this.object3d = obj;
+    };
+
+    Satellite.prototype.position = function(date, gmst) {
+        var p = satellite.propagate(
     		this.satrec,
     		date.getUTCFullYear(),
     		date.getUTCMonth() + 1, // Note, this function requires months in range 1-12.
@@ -25,36 +29,17 @@ TRACKER.Satellite = (function() {
     		date.getUTCSeconds()
     	).position;
 
-        return new THREE.Vector3(position.x, position.z, -position.y).divideScalar(this.scale);
-    };
-
-    Satellite.prototype.setObj = function(obj) {
-        this.object3d = obj;
+        return new THREE.Vector3(p.x, p.z, -p.y)
+            .divideScalar(this.scale)
+            .applyAxisAngle(this.axis, CoordConverter.getTerrestrialAngle(date, gmst));
     };
 
     Satellite.prototype.propagate = function(date, gmst) {
-        var position = this.terraPosition(date, gmst);
+        var position = this.position(date, gmst);
         this.object3d.position.copy(position);
 
         return position;
     }
-
-    Satellite.prototype.terraPosition = function(date, gmst) {
-        var deg,
-            _gmst = gmst || satellite.gstimeFromDate(
-        		date.getUTCFullYear(),
-        		date.getUTCMonth() + 1, // Note, this function requires months in range 1-12.
-        		date.getUTCDate(),
-        		date.getUTCHours(),
-        		date.getUTCMinutes(),
-        		date.getUTCSeconds()
-        	);
-
-        deg = _gmst * (180/Math.PI);
-        deg += (deg >= 360) ? -360 : (deg < 0) ? 360 : 0;
-
-        return this.fixPosition(date).applyAxisAngle(this.axis, -omega*deg/15*3600);
-    };
 
     return Satellite;
 

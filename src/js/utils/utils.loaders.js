@@ -1,6 +1,6 @@
-TRACKER.namespace('utils');
+TRACKER.namespace('utils.Loaders');
 
-TRACKER.utils = (function() {
+TRACKER.utils.Loaders = (function() {
     'use strict';
 
     return {

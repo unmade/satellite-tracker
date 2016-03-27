@@ -1,35 +1,35 @@
-'use strict';
+TRACKER.namespace('Sun');
 
+TRACKER.Sun = (function() {
+    'use strict';
 
-TRACKER.namespace('sun');
+    var Const = TRACKER.utils.Constants,
+        CoordConverter = TRACKER.utils.CoordinateConverter,
+        DateConverter = TRACKER.utils.DateConverter;
 
+    function frac(f) {
+        return f % 1;
+    }
 
-TRACKER.sun = (function() {
-    var textureLoader = new THREE.TextureLoader(),
-        textureFlare0 = textureLoader.load( "/src/images/lensflare/lensflare0.png" ),
-        textureFlare2 = textureLoader.load( "/src/images/lensflare/lensflare2.png" ),
-        textureFlare3 = textureLoader.load( "/src/images/lensflare/lensflare3.png" );
+    var Sun = function(textures, color) {
+        var flareColor = new THREE.Color( 0xffffff );
 
-    var lensFlare,
-        light;
+        if (color) {
+            flareColor.setHSL( color.h, color.s, color.l + 0.5 );
+        }
+        else {
+            flareColor.setHSL( 0.55, 0.9, 0.5 + 0.5 );
+        }
 
-    addLight( 0.55, 0.9, 0.5, 5000, 0, 5000 );
-
-	function addLight( h, s, l, x, y, z ) {
-		light = new THREE.DirectionalLight( 0xffffff, 1 );
-		light.position.set( x, y, z );
-
-		var flareColor = new THREE.Color( 0xffffff );
-		flareColor.setHSL( h, s, l + 0.5 );
-		lensFlare = new THREE.LensFlare( textureFlare0, 350, 0.0, THREE.AdditiveBlending, flareColor );
-		lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
-		lensFlare.add( textureFlare3, 60, 0.6, THREE.AdditiveBlending );
-		lensFlare.add( textureFlare3, 70, 0.7, THREE.AdditiveBlending );
-		lensFlare.add( textureFlare3, 120, 0.9, THREE.AdditiveBlending );
-		lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
-		lensFlare.customUpdateCallback = lensFlareUpdateCallback;
-		lensFlare.position.set( x, y, z );
-	}
+        this.light = new THREE.DirectionalLight( 0xffffff, 1 );
+        this.lensFlare = new THREE.LensFlare( textures[0], 350, 0.0, THREE.AdditiveBlending, flareColor );
+        this.lensFlare.add( textures[1], 512, 0.0, THREE.AdditiveBlending );
+        this.lensFlare.add( textures[2], 60, 0.6, THREE.AdditiveBlending );
+        this.lensFlare.add( textures[2], 70, 0.7, THREE.AdditiveBlending );
+        this.lensFlare.add( textures[2], 120, 0.9, THREE.AdditiveBlending );
+        this.lensFlare.add( textures[2], 70, 1.0, THREE.AdditiveBlending );
+        this.lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+    };
 
     function lensFlareUpdateCallback( object ) {
 		var f, fl = object.lensFlares.length;
@@ -46,9 +46,43 @@ TRACKER.sun = (function() {
 		object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
 	}
 
-    return {
-        light: light,
-        lensFlare: lensFlare
+    Sun.prototype.sunEclipticPosition = function(date) {
+        var tdb = DateConverter.utcToTdb(date),
+            ts = (tdb - Const.MJD2000) / Const.JULIAN_C,
+            u3 = Const.PI2 * frac(0.993133 + 99.997361*ts);
+
+        var l = Const.PI2 * frac(0.7859453 + u3/Const.PI2 +
+                        (6893.0*Math.sin(u3) + 72.0*Math.sin(2*u3) + 6191.2 * ts) / 1296.0e3);
+        var b = 0;
+        var r = 1.0001398 + 1.0e-6 *
+                    ((-16707.37 + 42.04*ts) * Math.cos(u3) - 139.57*Math.cos(2*u3) +
+                      30.76*Math.cos(Const.PI2*frac(0.8274+1236.8531*ts)));
+
+        return {
+            lambda: l,
+            betta: b,
+            range: r * Const.AU
+        };
     }
+
+    Sun.prototype.position = function(date) {
+        var tdb = DateConverter.utcToTdb(date),
+            eclPos = this.sunEclipticPosition(date),
+            equPos = CoordConverter.eclipSpherToEquCart(tdb, eclPos.lambda, eclPos.betta, eclPos.range);
+
+        return new THREE.Vector3(equPos.x, equPos.z, -equPos.y).divideScalar(63.71)
+            .applyAxisAngle(new THREE.Vector3(0,1,0), CoordConverter.getTerrestrialAngle(date));
+    }
+
+    Sun.prototype.propagate = function(date) {
+        var p = this.position(date);
+
+        this.lensFlare.position.copy(p);
+        this.light.position.copy(p);
+
+        return p;
+    }
+
+    return Sun;
 
 })();
