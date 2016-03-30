@@ -1,16 +1,34 @@
+/**
+ * @file Coverts date between different formats
+ * @author Aleksey Maslakov
+ */
+
 TRACKER.namespace('utils.DateConverter');
 
+/** @namespace utils/utils.date-converter.js */
 TRACKER.utils.DateConverter = (function() {
     'use strict';
     var Const = TRACKER.utils.Constants;
 
     return {
+        /** Returns ΔT (difference between UT and TT) */
         getDeltaT: getDeltaT,
+
+        /** Converts civil UTC date to the modified julian days (MJD) */
         utcToMjd: utcToMjd,
+
+        /** Converts civil UTC date to the barycentric dynamic time (TDB) */
         utcToTdb: utcToTdb,
+
+        /** Converts civil UTC date to the terrestrial time (TT) */
         utcToTT: utcToTT,
     }
 
+    /**
+     * Converts civil UTC date to the modified julian days (MJD)
+     * @param {Date object} date - Date to be converted.
+     * @return {number} Date in modified julian days in UTC scale.
+     */
     function utcToMjd(date) {
         var nyear = date.getUTCFullYear(),
             nmonth = date.getUTCMonth() + 1,
@@ -29,7 +47,12 @@ TRACKER.utils.DateConverter = (function() {
 
         return jd - Const.DIFF_EPOCH;
     }
-    
+
+    /**
+     * Converts civil UTC date to the barycentric dynamic time (TDB)
+     * @param {Date object} date - Date to be converted.
+     * @return {number} Date in modified julian days in TDB scale.
+     */
     function utcToTdb(date) {
         var tt = utcToTT(date),
             d = (tt - Const.MJD2000) / Const.JULIAN_C,
@@ -38,6 +61,11 @@ TRACKER.utils.DateConverter = (function() {
         return tt + (0.001658 * Math.sin(g + 0.0167*Math.sin(g))) / Const.SEC_IN_DAY;
     }
 
+    /**
+     * Converts civil UTC date to the terrestrial time (TT)
+     * @param {Date object} date - Date to be converted.
+     * @return {number} Date in modified julian days in TT scale.
+     */
     function utcToTT(date) {
         var mjd = utcToMjd(date),
             deltaT = getDeltaT(date.getUTCFullYear(), date.getUTCMonth() + 1);
@@ -45,6 +73,11 @@ TRACKER.utils.DateConverter = (function() {
         return mjd + (deltaT / Const.SEC_IN_DAY);
     }
 
+    /** Returns ΔT (Correction (TT-UTC) in second)
+     * @param {number} nyear - Full utc year
+     * @param {number} nmonth - Month (1 - 12)
+     * @return {number} Correction (TT-UTC) in second
+     */
     function getDeltaT(nyear, nmonth) {
         var leap_second = 0;
 

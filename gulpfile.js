@@ -7,8 +7,7 @@ var gulp = require('gulp'),
 var paths = {
     scripts: ['src/js/module.js',
               'src/js/utils/*.js',
-              'src/js/*.js',
-              'src/js/main.js']
+              'src/js/*.js']
 };
 
 

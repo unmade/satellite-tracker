@@ -11,7 +11,7 @@ TRACKER.Sun = (function() {
         return f % 1;
     }
 
-    var Sun = function(textures, color) {
+    var Sun = function(textures, color, scale) {
         var flareColor = new THREE.Color( 0xffffff );
 
         if (color) {
@@ -29,6 +29,7 @@ TRACKER.Sun = (function() {
         this.lensFlare.add( textures[2], 120, 0.9, THREE.AdditiveBlending );
         this.lensFlare.add( textures[2], 70, 1.0, THREE.AdditiveBlending );
         this.lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+        this.scale = scale || 63.71;
     };
 
     function lensFlareUpdateCallback( object ) {
@@ -70,8 +71,7 @@ TRACKER.Sun = (function() {
             eclPos = this.sunEclipticPosition(date),
             equPos = CoordConverter.eclipSpherToEquCart(tdb, eclPos.lambda, eclPos.betta, eclPos.range);
 
-        return new THREE.Vector3(equPos.x, equPos.z, -equPos.y).divideScalar(63.71)
-            .applyAxisAngle(new THREE.Vector3(0,1,0), CoordConverter.getTerrestrialAngle(date));
+        return new THREE.Vector3(equPos.x, equPos.z, -equPos.y).divideScalar(this.scale);
     }
 
     Sun.prototype.propagate = function(date) {

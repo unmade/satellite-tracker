@@ -14,6 +14,7 @@ TRACKER.utils.Constants = (function() {
         PI2: 2*Math.PI,
         SEC_IN_DAY: 86400.0,
         SEC_IN_RAD: 4.8481368110953597467454098131995829e-06,
-        TT_TAI_DIFF: 32.184
+        TT_TAI_DIFF: 32.184,
+        R0: 6378.1363
     }
 })();

@@ -1,3 +1,8 @@
+/**
+ * @file Celestial Object uniforms
+ * @author Aleksey Maslakov
+ */
+
 TRACKER.namespace('CelestialObject.uniforms');
 
 TRACKER.CelestialObject.uniforms = (function() {
@@ -39,6 +44,10 @@ TRACKER.CelestialObject.uniforms = (function() {
 
     function configureUniforms(diffuse, diffuseNight, diffuseSpecular, atmosphere) {
         return {
+            m3RotY: {
+                type: "m3",
+                value: new THREE.Matrix3()
+            },
             v3LightPosition: {
                 type: "v3",
                 value: new THREE.Vector3(1e8, 0, 1e8).normalize()

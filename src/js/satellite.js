@@ -8,7 +8,6 @@ TRACKER.Satellite = (function() {
         Satellite;
 
     Satellite = function(tle, scale, object3d) {
-        this.axis = new THREE.Vector3(0, 1, 0);
         this.object3d = object3d;
         this.satrec = satellite.twoline2satrec(tle.line1, tle.line2);
         this.scale = scale;
@@ -29,9 +28,7 @@ TRACKER.Satellite = (function() {
     		date.getUTCSeconds()
     	).position;
 
-        return new THREE.Vector3(p.x, p.z, -p.y)
-            .divideScalar(this.scale)
-            .applyAxisAngle(this.axis, CoordConverter.getTerrestrialAngle(date, gmst));
+        return new THREE.Vector3(p.x, p.z, -p.y).divideScalar(this.scale);
     };
 
     Satellite.prototype.propagate = function(date, gmst) {

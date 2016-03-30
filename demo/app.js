@@ -8,12 +8,12 @@ $(document).ready(function() {
 
 	var tle = {
 		elektro1: {
-			"line1": "1 37344U 11001A   16084.50580970  .00000000  00000-0  10000-3 0  9991",
-			"line2": "2 37344   1.5394  79.7599 0005633 181.1213 179.7726  1.00271467 19002"
+			"line1": "1 37344U 11001A   16089.08445441 -.00000109  00000-0  00000+0 0  9998",
+			"line2": "2 37344   1.5488  79.7204 0004243 185.3717  28.4035  1.00272932 19045"
 		},
 		elektro2: {
-			"line1": "1 41105U 15074A   16084.53509896 -.00000132  00000-0  00000+0 0  9998",
-			"line2": "2 41105   0.2604 277.8149 0001219 144.5680  30.4420  1.00273958  1058"
+			"line1": "1 41105U 15074A   16088.85108008 -.00000125  00000-0  00000+0 0  9999",
+			"line2": "2 41105   0.2520 277.8033 0001441 151.5660 141.5013  1.00274042  1091"
 		},
 		iss: {
 			"line1": "1 25544U 98067A   16087.52161653  .00004158  00000-0  69668-4 0  9998",
@@ -22,7 +22,9 @@ $(document).ready(function() {
 	};
 
 	var scale = 63.71,
-		now = new Date();
+		now = new Date(),
+		i = 0,
+		moonPosition;
 
 	var	earth,
 		moon,
@@ -93,16 +95,20 @@ $(document).ready(function() {
 			elektro1 = new TRACKER.Satellite(tle.elektro1, scale, assets.elektro.clone());
 		    elektro2 = new TRACKER.Satellite(tle.elektro2, scale, assets.elektro.clone());
 
-			position = elektro1.propagate(now);
-			elektro2.propagate(now);
+			position = elektro2.propagate(now);
+			elektro1.propagate(now);
 			camera.position.copy(position).multiplyScalar(1.05);
 
 			var lightPosition = sun.propagate(now);
 			earth.lightPosition(lightPosition);
 
-			moon.position(new THREE.Vector3(100, 4e5/scale, 200));
-			moon.lightPosition(lightPosition);
+			var angle = TRACKER.utils.CoordinateConverter.getGMST(now);
+			earth.rotateY(angle);
+			moon.rotateY(angle);
 
+			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(now).divideScalar(63.71);
+
+			moon.lightPosition(lightPosition);
 			scene.add(earth.ground);
 			scene.add(earth.sky);
 			scene.add(moon.ground);
@@ -126,7 +132,7 @@ $(document).ready(function() {
 			loaders.defferedTextureLoader(assets, 'moon', '/src/images/moon/moon-low.jpg'),
 			loaders.defferedTextureLoader(assets, 'moonNight', '/src/images/earth/default-night.jpg'),
 			loaders.defferedTextureLoader(assets, 'moonSpecular', '/src/images/earth/default-specular.png'),
-			loaders.defferedOBJLoader(assets, 'elektro', '/src/obj/elektro.obj')
+			loaders.defferedOBJMTLLoader(assets, 'elektro', '/src/obj/elektro.obj', '/src/obj/Elektro.mtl')
 		)
 		.then(function() {
 			onLoad();
@@ -135,7 +141,11 @@ $(document).ready(function() {
 
 
 	function animate() {
-        requestAnimationFrame( animate );
+		setTimeout(function() {
+			requestAnimationFrame( animate );
+			i++;
+		})
+
 	    render();
 	}
 
@@ -150,6 +160,19 @@ $(document).ready(function() {
         earth.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         earth.ground.material.uniforms.fCameraHeight2.value = cameraHeight2;
 
+		var nnow = new Date(now.getTime() + i*3600000);
+
+		var position = elektro1.propagate(nnow);
+		elektro2.propagate(nnow);
+
+		var lightPosition = sun.propagate(nnow);
+		earth.lightPosition(lightPosition);
+
+		var angle = TRACKER.utils.CoordinateConverter.getGMST(nnow);
+		earth.rotateY(angle);
+
+		var moonCameraHeight = moonPosition.length() - cameraHeight;
+		var moonCameraHeight2 = moonCameraHeight*moonCameraHeight;
 		moon.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         moon.ground.material.uniforms.fCameraHeight2.value = cameraHeight2;
 		moon.sky.material.uniforms.fCameraHeight.value = cameraHeight;
