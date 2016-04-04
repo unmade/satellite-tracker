@@ -38,6 +38,12 @@ TRACKER.Satellite = (function() {
         return position;
     }
 
+    Satellite.prototype.rotateY = function(angle) {
+        var axis = new THREE.Vector3(0, 1, 0);
+
+        this.object3d.position.applyAxisAngle(axis, angle);
+    }
+
     return Satellite;
 
 })();

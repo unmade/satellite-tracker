@@ -83,6 +83,13 @@ TRACKER.Sun = (function() {
         return p;
     }
 
+    Sun.prototype.rotateY = function(angle) {
+        var axis = new THREE.Vector3(0, 1, 0);
+
+        this.lensFlare.position.applyAxisAngle(axis, angle);
+        this.light.position.applyAxisAngle(axis, angle);
+    }
+
     return Sun;
 
 })();

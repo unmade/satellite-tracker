@@ -27,10 +27,8 @@ $(document).ready(function() {
 	};
 
 	var scale = 63.71,
-		now = new Date('2011-03-18T05:17:00'),
-		nnow,
 		i = 0,
-		moonPosition;
+		yAxis = new THREE.Vector3(0, 1, 0);
 
 	var	earth,
 		moon,
@@ -56,7 +54,8 @@ $(document).ready(function() {
 
 		player.init({
 			date: new Date(),
-			callback: propagate
+			onDateChangeCallback: propagate,
+			onSystemCoordinateChangeCallback: onSystemCoordinateChange
 		});
 
 		camera = new THREE.PerspectiveCamera(20, width / height, 1, 1e10);
@@ -104,19 +103,6 @@ $(document).ready(function() {
 
 			camera.position.copy(position).multiplyScalar(1.05);
 
-			var lightPosition = sun.propagate(player.date);
-			earth.lightPosition(lightPosition);
-
-			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71);
-			moon.lightPosition(lightPosition);
-			moon.position(moonPosition);
-
-			var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
-			earth.rotateY(angle);
-			moon.rotateY(angle);
-
-			// earth.ground.add(camera);
-
 			scene.add(earth.ground);
 			scene.add(earth.sky);
 			scene.add(moon.ground);
@@ -160,18 +146,29 @@ $(document).ready(function() {
     function propagate() {
 		i++;
 
-		var position = elektro1.propagate(player.date);
+		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date),
+			lightPosition = sun.propagate(player.date),
+			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71),
+			position = elektro1.propagate(player.date);
+
 		elektro2.propagate(player.date);
 
-		moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71);
-		moon.position(moonPosition);
-
-		var lightPosition = sun.propagate(player.date);
-		earth.lightPosition(lightPosition);
-
-		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
-		earth.rotateY(angle);
-		moon.rotateY(angle);
+		if (player.coordinateSystem === 'heliocentric') {
+			earth.rotateY(angle);
+			earth.lightPosition(lightPosition);
+			moon.position(moonPosition);
+			moon.lightPosition(lightPosition);
+			moon.rotateY(angle);
+		}
+		if (player.coordinateSystem === 'geocentric') {
+			lightPosition = lightPosition.applyAxisAngle(yAxis, -angle);
+			earth.lightPosition(lightPosition);
+			elektro1.rotateY(-angle);
+			elektro2.rotateY(-angle);
+			moon.position(moonPosition.applyAxisAngle(yAxis, -angle));
+			moon.lightPosition(lightPosition);
+			sun.rotateY(-angle);
+		}
 
 		$('#propagation_date').text(player.date.toUTCString());
     }
@@ -212,5 +209,20 @@ $(document).ready(function() {
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
     }
+
+	function onSystemCoordinateChange() {
+		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
+		if (player.coordinateSystem === 'heliocentric') {
+			elektro1.rotateY(0);
+			elektro2.rotateY(0);
+			sun.rotateY(0);
+			controls.object.position.applyAxisAngle(yAxis, angle);
+		}
+		if (player.coordinateSystem === 'geocentric') {
+			earth.rotateY(0);
+			moon.rotateY(0);
+			controls.object.position.applyAxisAngle(yAxis, -angle);
+		}
+	}
 
 });

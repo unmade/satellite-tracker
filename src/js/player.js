@@ -5,9 +5,11 @@ TRACKER.Player = (function() {
 
     var player = {};
 
-    player.callback = null;
+    player.onDateChangeCallback = null;
     player.clicked = false;
+    player.coordinateSystem = 'geocentric';
     player.date = null;
+    player.onSystemCoordinateChangeCallback = null;
     player.play = true;
     player.speed = 1000;
     player.width = null;
@@ -21,6 +23,7 @@ TRACKER.Player = (function() {
     player.onDateClickedAndMove = onDateClickedAndMove;
     player.rewind = rewind;
     player.showPrehover = showPrehover;
+    player.toggleCoordinateSystem = toggleCoordinateSystem;
     player.togglePlay = togglePlay;
     player.toggleSpeed = toggleSpeed;
     player.toNow = toNow;
@@ -34,7 +37,8 @@ TRACKER.Player = (function() {
 
         player.date = config.date || new Date();
         player.width = $(document).width();
-        player.callback = config.callback || null;
+        player.onDateChangeCallback = config.onDateChangeCallback || null;
+        player.onSystemCoordinateChangeCallback = config.onSystemCoordinateChangeCallback || null;
 
         player.updateScale(player.range, player.width);
         player.updateDateRange(player.date);
@@ -45,6 +49,7 @@ TRACKER.Player = (function() {
         $('#forward').click(player.forward);
         $('#now').click(player.toNow);
         $('#speed').click(player.toggleSpeed);
+        $('#coordinate_system').click(player.toggleCoordinateSystem);
 
         $('.st-progress-bar').mousedown(player.onDateClicked)
             .mousemove(player.onDateChange)
@@ -126,9 +131,17 @@ TRACKER.Player = (function() {
         $('#play_button').toggleClass('hide');
     }
 
+    function toggleCoordinateSystem() {
+        $(this).toggleClass('warning');
+        player.coordinateSystem = (player.coordinateSystem === 'heliocentric') ? 'geocentric' : 'heliocentric';
+        if (typeof player.onSystemCoordinateChangeCallback === 'function') {
+            player.onSystemCoordinateChangeCallback();
+        }
+    }
+
     function toggleSpeed() {
         $(this).toggleClass('red');
-        player.speed = (player.speed === 1000) ? 2000 : 1000;
+        player.speed = (player.speed === 1000) ? 3000 : 1000;
     }
 
     function toNow() {
