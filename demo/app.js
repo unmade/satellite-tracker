@@ -1,7 +1,8 @@
 $(document).ready(function() {
 	'use strict';
 
-	var loaders = TRACKER.utils.Loaders,
+	var CoordinateConverter = TRACKER.utils.CoordinateConverter,
+		loaders = TRACKER.utils.Loaders,
 		player = TRACKER.Player;
 
 	var width  = window.innerWidth,
@@ -55,7 +56,8 @@ $(document).ready(function() {
 		player.init({
 			date: new Date(),
 			onDateChangeCallback: propagate,
-			onSystemCoordinateChangeCallback: onSystemCoordinateChange
+			toggleCoordinatesCallback: toggleCoordinates,
+			changeCameraViewCallback: changeCameraView
 		});
 
 		camera = new THREE.PerspectiveCamera(20, width / height, 1, 1e10);
@@ -73,7 +75,7 @@ $(document).ready(function() {
 		webglEl.appendChild(renderer.domElement);
 
 		controls = new THREE.TrackballControls(camera, document.getElementById('scene'));
-		controls.minDistance = 300;
+		controls.minDistance = 200;
 		controls.maxDistance = 1e10;
 
 		window.addEventListener( 'resize', onWindowResize, false );
@@ -98,10 +100,8 @@ $(document).ready(function() {
 			elektro1 = new TRACKER.Satellite(tle.elektro1, scale, assets.elektro.clone());
 		    elektro2 = new TRACKER.Satellite(tle.elektro2, scale, assets.elektro.clone());
 
-			position = elektro1.propagate(player.date);
-			elektro2.propagate(player.date);
-
-			camera.position.copy(position).multiplyScalar(1.05);
+			var angle = CoordinateConverter.getGMST(player.date)
+			camera.position.copy(elektro2.position(player.date).applyAxisAngle(yAxis, -angle)).multiplyScalar(1.05);
 
 			scene.add(earth.ground);
 			scene.add(earth.sky);
@@ -146,7 +146,7 @@ $(document).ready(function() {
     function propagate() {
 		i++;
 
-		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date),
+		var angle = CoordinateConverter.getGMST(player.date),
 			lightPosition = sun.propagate(player.date),
 			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71),
 			position = elektro1.propagate(player.date);
@@ -210,8 +210,8 @@ $(document).ready(function() {
         renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
-	function onSystemCoordinateChange() {
-		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
+	function toggleCoordinates() {
+		var angle = CoordinateConverter.getGMST(player.date);
 		if (player.coordinateSystem === 'heliocentric') {
 			elektro1.rotateY(0);
 			elektro2.rotateY(0);
@@ -224,5 +224,25 @@ $(document).ready(function() {
 			controls.object.position.applyAxisAngle(yAxis, -angle);
 		}
 	}
+
+	function changeCameraView() {
+		var setCameraTo = $(this).attr('set-camera-to');
+		if (setCameraTo === 'earth') {
+			controls.target = earth.position();
+			camera.position.set(0, 0, 1250.0);
+		}
+		if (setCameraTo === 'moon') {
+			controls.target = moon.position();
+			camera.position.copy(moon.position()).multiplyScalar(1.1);
+		}
+		if (setCameraTo === 'elektro1') {
+			controls.target = elektro1.object3d.position;
+			camera.position.copy(elektro1.object3d.position).multiplyScalar(1.1);
+		}
+		if (setCameraTo === 'elektro2') {
+			controls.target = elektro2.object3d.position;
+			camera.position.copy(elektro2.object3d.position).multiplyScalar(1.1);
+		}
+	};
 
 });

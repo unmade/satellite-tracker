@@ -6,24 +6,27 @@ TRACKER.Player = (function() {
     var player = {};
 
     player.onDateChangeCallback = null;
+    player.changeCameraViewCallback = null;
     player.clicked = false;
     player.coordinateSystem = 'geocentric';
     player.date = null;
-    player.onSystemCoordinateChangeCallback = null;
     player.play = true;
     player.speed = 1000;
+    player.toggleCoordinatesCallback = null;
     player.width = null;
 
     player.init = init;
     player.dateClicked = dateClicked;
     player.forward = forward;
+    player.hideCameraViewPopup = hideCameraViewPopup;
     player.hidePrehover = hidePrehover;
     player.onDateChange = onDateChange;
     player.onDateClicked = onDateClicked;
     player.onDateClickedAndMove = onDateClickedAndMove;
     player.rewind = rewind;
+    player.showCameraViewPopup = showCameraViewPopup;
     player.showPrehover = showPrehover;
-    player.toggleCoordinateSystem = toggleCoordinateSystem;
+    player.toggleCoordinates = toggleCoordinates;
     player.togglePlay = togglePlay;
     player.toggleSpeed = toggleSpeed;
     player.toNow = toNow;
@@ -38,7 +41,8 @@ TRACKER.Player = (function() {
         player.date = config.date || new Date();
         player.width = $(document).width();
         player.onDateChangeCallback = config.onDateChangeCallback || null;
-        player.onSystemCoordinateChangeCallback = config.onSystemCoordinateChangeCallback || null;
+        player.toggleCoordinatesCallback = config.toggleCoordinatesCallback || null;
+        player.changeCameraViewCallback = config.changeCameraViewCallback || null;
 
         player.updateScale(player.range, player.width);
         player.updateDateRange(player.date);
@@ -49,7 +53,9 @@ TRACKER.Player = (function() {
         $('#forward').click(player.forward);
         $('#now').click(player.toNow);
         $('#speed').click(player.toggleSpeed);
-        $('#coordinate_system').click(player.toggleCoordinateSystem);
+        $('#coordinate_system').click(player.toggleCoordinates);
+        $('#camera_view').click(player.showCameraViewPopup);
+        $('#camera_view_popup .st-popup-item').click(player.changeCameraViewCallback);
 
         $('.st-progress-bar').mousedown(player.onDateClicked)
             .mousemove(player.onDateChange)
@@ -57,7 +63,8 @@ TRACKER.Player = (function() {
             .mouseleave(player.hidePrehover);
 
         $(document).mousemove(player.onDateClickedAndMove)
-            .mouseup(player.dateClicked);
+            .mouseup(player.dateClicked)
+            .mouseup(player.hideCameraViewPopup);
 
         return player;
     }
@@ -69,9 +76,17 @@ TRACKER.Player = (function() {
     function forward() {
 		player.date.setUTCMonth(player.date.getUTCMonth() + 1);
 		player.updateDateRange(player.date);
-        if (!player.play && typeof player.callback === 'function') {
-			player.callback();
+        if (!player.play && typeof player.onDateChangeCallback === 'function') {
+			player.onDateChangeCallback();
 		}
+    }
+
+    function hideCameraViewPopup(e) {
+        var container = $("#camera_view_popup");
+
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+            container.hide();
+        }
     }
 
     function hidePrehover() {
@@ -97,8 +112,8 @@ TRACKER.Player = (function() {
 			width: e.pageX
 		});
 		player.date = date;
-		if (!player.play && typeof player.callback === 'function') {
-			player.callback();
+		if (!player.play && typeof player.onDateChangeCallback === 'function') {
+			player.onDateChangeCallback();
 		}
 	}
 
@@ -115,10 +130,21 @@ TRACKER.Player = (function() {
     function rewind() {
 		player.date.setUTCMonth(player.date.getUTCMonth() - 1);
 		player.updateDateRange(player.date);
-        if (!player.play && typeof player.callback === 'function') {
-			player.callback();
+        if (!player.play && typeof player.onDateChangeCallback === 'function') {
+			player.onDateChangeCallback();
 		}
 	}
+
+    function showCameraViewPopup() {
+		var popup = $('#camera_view_popup'),
+			cameraView = $('#camera_view'),
+			popupHalfWidth = popup.width() / 2;
+
+		$('.st-popup-arrow').css({
+			'left': $(document).width() - cameraView.offset().left + cameraView.outerWidth() / 2 - 5
+		});
+		popup.toggle(100);
+	};
 
     function showPrehover() {
         $('.st-hover-progress').show(100);
@@ -131,11 +157,11 @@ TRACKER.Player = (function() {
         $('#play_button').toggleClass('hide');
     }
 
-    function toggleCoordinateSystem() {
+    function toggleCoordinates() {
         $(this).toggleClass('warning');
         player.coordinateSystem = (player.coordinateSystem === 'heliocentric') ? 'geocentric' : 'heliocentric';
-        if (typeof player.onSystemCoordinateChangeCallback === 'function') {
-            player.onSystemCoordinateChangeCallback();
+        if (typeof player.toggleCoordinatesCallback === 'function') {
+            player.toggleCoordinatesCallback();
         }
     }
 
@@ -167,7 +193,6 @@ TRACKER.Player = (function() {
     function updateScale(range, width) {
         player.scale = player.range / player.width;
     }
-
 
     return player;
 
