@@ -1,7 +1,8 @@
 $(document).ready(function() {
 	'use strict';
 
-	var loaders = TRACKER.utils.Loaders;
+	var loaders = TRACKER.utils.Loaders,
+		player = TRACKER.Player;
 
 	var width  = window.innerWidth,
 		height = window.innerHeight;
@@ -15,6 +16,10 @@ $(document).ready(function() {
 			"line1": "1 41105U 15074A   16088.85108008 -.00000125  00000-0  00000+0 0  9999",
 			"line2": "2 41105   0.2520 277.8033 0001441 151.5660 141.5013  1.00274042  1091"
 		},
+		spektrr: {
+			line1: "1 37755U 11037A   16091.41028187 -.00007822  00000-0  00000+0 0  9996",
+			line2: "2 37755  38.8255  45.7767 9318024 260.5904   2.5200  0.11364580  2019"
+		},
 		iss: {
 			"line1": "1 25544U 98067A   16087.52161653  .00004158  00000-0  69668-4 0  9998",
 			"line2": "2 25544  51.6430 105.3354 0002084   2.4544 144.7923 15.54266717992278"
@@ -22,7 +27,8 @@ $(document).ready(function() {
 	};
 
 	var scale = 63.71,
-		now = new Date(),
+		now = new Date('2011-03-18T05:17:00'),
+		nnow,
 		i = 0,
 		moonPosition;
 
@@ -38,7 +44,6 @@ $(document).ready(function() {
 		renderer,
 		controls;
 
-
 	init();
 
 
@@ -48,6 +53,11 @@ $(document).ready(function() {
 			moonRadius = 1738.14 / scale,
 			position,
 			webglEl = document.getElementById('scene');
+
+		player.init({
+			date: new Date(),
+			callback: propagate
+		});
 
 		camera = new THREE.PerspectiveCamera(20, width / height, 1, 1e10);
 		camera.up = new THREE.Vector3( 0, 1, 0 );
@@ -80,12 +90,6 @@ $(document).ready(function() {
 			});
 
 			moon = new TRACKER.CelestialObject({
-				atmosphere: {
-					ESun: 10,
-					innerRadius: moonRadius,
-					outerRadius: moonRadius + 0.1,
-					wavelength: [0.55, 0.55, 0.55]
-				},
 				diffuse: assets.moon,
 				diffuseNight: assets.moonNight,
 				diffuseSpecular: assets.moonSpecular
@@ -95,20 +99,24 @@ $(document).ready(function() {
 			elektro1 = new TRACKER.Satellite(tle.elektro1, scale, assets.elektro.clone());
 		    elektro2 = new TRACKER.Satellite(tle.elektro2, scale, assets.elektro.clone());
 
-			position = elektro2.propagate(now);
-			elektro1.propagate(now);
+			position = elektro1.propagate(player.date);
+			elektro2.propagate(player.date);
+
 			camera.position.copy(position).multiplyScalar(1.05);
 
-			var lightPosition = sun.propagate(now);
+			var lightPosition = sun.propagate(player.date);
 			earth.lightPosition(lightPosition);
 
-			var angle = TRACKER.utils.CoordinateConverter.getGMST(now);
+			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71);
+			moon.lightPosition(lightPosition);
+			moon.position(moonPosition);
+
+			var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
 			earth.rotateY(angle);
 			moon.rotateY(angle);
 
-			moonPosition = TRACKER.MoonPosition.getEquatorialPosition(now).divideScalar(63.71);
+			// earth.ground.add(camera);
 
-			moon.lightPosition(lightPosition);
 			scene.add(earth.ground);
 			scene.add(earth.sky);
 			scene.add(moon.ground);
@@ -120,6 +128,7 @@ $(document).ready(function() {
 			scene.add(new THREE.AmbientLight(0x111111));
 
 			animate();
+			updateDate();
 		};
 
 		$.when(
@@ -140,13 +149,42 @@ $(document).ready(function() {
 	}
 
 
-	function animate() {
+	function updateDate() {
 		setTimeout(function() {
-			requestAnimationFrame( animate );
-			i++;
-		})
+			requestAnimationFrame(updateDate);
+		}, (player.play && player.speed === 1000) ? 1000 : 0);
+		player.date = new Date(player.date.getTime() + player.speed);
+		player.updateHover();
+	}
 
-	    render();
+    function propagate() {
+		i++;
+
+		var position = elektro1.propagate(player.date);
+		elektro2.propagate(player.date);
+
+		moonPosition = TRACKER.MoonPosition.getEquatorialPosition(player.date).divideScalar(63.71);
+		moon.position(moonPosition);
+
+		var lightPosition = sun.propagate(player.date);
+		earth.lightPosition(lightPosition);
+
+		var angle = TRACKER.utils.CoordinateConverter.getGMST(player.date);
+		earth.rotateY(angle);
+		moon.rotateY(angle);
+
+		$('#propagation_date').text(player.date.toUTCString());
+    }
+
+
+	function animate() {
+		requestAnimationFrame( animate );
+
+		if (player.play && player.speed != 1) {
+			propagate();
+		}
+
+		render();
 	}
 
 	function render() {
@@ -160,19 +198,6 @@ $(document).ready(function() {
         earth.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         earth.ground.material.uniforms.fCameraHeight2.value = cameraHeight2;
 
-		var nnow = new Date(now.getTime() + i*3600000);
-
-		var position = elektro1.propagate(nnow);
-		elektro2.propagate(nnow);
-
-		var lightPosition = sun.propagate(nnow);
-		earth.lightPosition(lightPosition);
-
-		var angle = TRACKER.utils.CoordinateConverter.getGMST(nnow);
-		earth.rotateY(angle);
-
-		var moonCameraHeight = moonPosition.length() - cameraHeight;
-		var moonCameraHeight2 = moonCameraHeight*moonCameraHeight;
 		moon.ground.material.uniforms.fCameraHeight.value = cameraHeight;
         moon.ground.material.uniforms.fCameraHeight2.value = cameraHeight2;
 		moon.sky.material.uniforms.fCameraHeight.value = cameraHeight;
@@ -182,6 +207,7 @@ $(document).ready(function() {
 	}
 
     function onWindowResize() {
+		player.updateScale(player.range, $(document).width());
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
