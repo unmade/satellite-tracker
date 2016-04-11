@@ -107,7 +107,7 @@ $(document).ready(function() {
 		    spektr = new TRACKER.Satellite(tle.spektrr, scale, assets.spektr.clone());
 
 			var angle = CoordinateConverter.getGMST(player.date)
-			camera.position.copy(elektro2.position(player.date).applyAxisAngle(yAxis, -angle)).multiplyScalar(1.05);
+			camera.position.copy(elektro2.position(player.date).applyAxisAngle(yAxis, -angle)).multiplyScalar(1.3);
 
 			scene.add(earth.ground);
 			scene.add(earth.sky);
@@ -122,6 +122,8 @@ $(document).ready(function() {
 
 			animate();
 			updateDate();
+
+			$('.st-background-container').fadeOut('slow');
 		};
 
 		$.when(
