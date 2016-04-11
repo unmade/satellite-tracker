@@ -34,9 +34,9 @@ $(document).ready(function() {
 	var	earth,
 		moon,
 		sun,
-		milkyway,
 		elektro1,
-		elektro2;
+		elektro2,
+		spektr;
 
 	var camera,
 		scene,
@@ -57,7 +57,8 @@ $(document).ready(function() {
 			date: new Date(),
 			onDateChangeCallback: propagate,
 			toggleCoordinatesCallback: toggleCoordinates,
-			changeCameraViewCallback: changeCameraView
+			changeCameraViewCallback: changeCameraView,
+			snapshotCallback: makeSnapshot
 		});
 
 		camera = new THREE.PerspectiveCamera(20, width / height, 1, 1e10);
@@ -68,7 +69,11 @@ $(document).ready(function() {
 		var axisHelper = new THREE.AxisHelper( 1000 );
 		// scene.add( axisHelper );
 
-		renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true});
+		renderer = new THREE.WebGLRenderer({
+			antialias: true,
+			alpha: true,
+			preserveDrawingBuffer: true
+		});
 		renderer.setPixelRatio(window.devicePixelRatio || 1);
 		renderer.setSize(width, height);
 		renderer.setClearColor(0x000000, 1);
@@ -82,10 +87,9 @@ $(document).ready(function() {
 
 		var onLoad = function() {
 			sun = new TRACKER.Sun([assets.lensflare0, assets.lensflare2, assets.lensflare3]);
-			milkyway = TRACKER.milkyway;
 
 			earth = new TRACKER.CelestialObject({
-				diffuse: assets.earthDay,
+				diffuse: assets.earth,
 				diffuseNight: assets.earthNight,
 				diffuseSpecular: assets.earthSpecular
 			});
@@ -96,9 +100,11 @@ $(document).ready(function() {
 				diffuseSpecular: assets.moonSpecular
 			});
 
-			assets.elektro.scale.set(1e-3, 1e-3, 1e-3);
+			// assets.elektro.scale.set(1e-3, 1e-3, 1e-3);
+			assets.spektr.scale.set(9e-4, 9e-4, 9e-4);
 			elektro1 = new TRACKER.Satellite(tle.elektro1, scale, assets.elektro.clone());
 		    elektro2 = new TRACKER.Satellite(tle.elektro2, scale, assets.elektro.clone());
+		    spektr = new TRACKER.Satellite(tle.spektrr, scale, assets.spektr.clone());
 
 			var angle = CoordinateConverter.getGMST(player.date)
 			camera.position.copy(elektro2.position(player.date).applyAxisAngle(yAxis, -angle)).multiplyScalar(1.05);
@@ -109,6 +115,7 @@ $(document).ready(function() {
 			scene.add(moon.sky);
 			scene.add(elektro1.object3d);
 			scene.add(elektro2.object3d);
+			scene.add(spektr.object3d);
 			scene.add(sun.lensFlare);
 			scene.add(sun.light);
 			scene.add(new THREE.AmbientLight(0x111111));
@@ -118,16 +125,17 @@ $(document).ready(function() {
 		};
 
 		$.when(
-			loaders.defferedTextureLoader(assets, 'earthDay', '/src/images/earth/diffuse-low.jpg'),
-			loaders.defferedTextureLoader(assets, 'earthNight', '/src/images/earth/diffuse-night-low.jpg'),
-			loaders.defferedTextureLoader(assets, 'earthSpecular', '/src/images/earth/diffuse-specular-low.png'),
-			loaders.defferedTextureLoader(assets, 'lensflare0', '/src/images/lensflare/lensflare0.png'),
-			loaders.defferedTextureLoader(assets, 'lensflare2', '/src/images/lensflare/lensflare2.png'),
-			loaders.defferedTextureLoader(assets, 'lensflare3', '/src/images/lensflare/lensflare3.png'),
-			loaders.defferedTextureLoader(assets, 'moon', '/src/images/moon/moon-low.jpg'),
-			loaders.defferedTextureLoader(assets, 'moonNight', '/src/images/earth/default-night.jpg'),
-			loaders.defferedTextureLoader(assets, 'moonSpecular', '/src/images/earth/default-specular.png'),
-			loaders.defferedOBJMTLLoader(assets, 'elektro', '/src/obj/elektro.obj', '/src/obj/Elektro.mtl')
+			loaders.defferedTextureLoader(assets, 'earth', '/dist/images/textures/earth/diffuse-2k.jpg'),
+			loaders.defferedTextureLoader(assets, 'earthNight', '/dist/images/textures/earth/diffuse-night-2k.jpg'),
+			loaders.defferedTextureLoader(assets, 'earthSpecular', '/dist/images/textures/earth/diffuse-specular-2k.png'),
+			loaders.defferedTextureLoader(assets, 'lensflare0', '/dist/images/textures/lensflare/lensflare0.png'),
+			loaders.defferedTextureLoader(assets, 'lensflare2', '/dist/images/textures/lensflare/lensflare2.png'),
+			loaders.defferedTextureLoader(assets, 'lensflare3', '/dist/images/textures/lensflare/lensflare3.png'),
+			loaders.defferedTextureLoader(assets, 'moon', '/dist/images/textures/moon/moon-2k.jpg'),
+			loaders.defferedTextureLoader(assets, 'moonNight', '/dist/images/textures/earth/default-night.jpg'),
+			loaders.defferedTextureLoader(assets, 'moonSpecular', '/dist/images/textures/earth/default-specular.png'),
+			loaders.defferedOBJMTLLoader(assets, 'elektro', '/dist/obj/Aura_27.obj', '/dist/obj/Aura_27.mtl'),
+			loaders.defferedOBJMTLLoader(assets, 'spektr', '/dist/obj/jason-1_final.obj', '/dist/obj/jason-1_final.mtl')
 		)
 		.then(function() {
 			onLoad();
@@ -152,6 +160,7 @@ $(document).ready(function() {
 			position = elektro1.propagate(player.date);
 
 		elektro2.propagate(player.date);
+		spektr.propagate(player.date);
 
 		if (player.coordinateSystem === 'heliocentric') {
 			earth.rotateY(angle);
@@ -165,6 +174,7 @@ $(document).ready(function() {
 			earth.lightPosition(lightPosition);
 			elektro1.rotateY(-angle);
 			elektro2.rotateY(-angle);
+			spektr.rotateY(-angle);
 			moon.position(moonPosition.applyAxisAngle(yAxis, -angle));
 			moon.lightPosition(lightPosition);
 			sun.rotateY(-angle);
@@ -200,13 +210,14 @@ $(document).ready(function() {
 		moon.sky.material.uniforms.fCameraHeight.value = cameraHeight;
         moon.sky.material.uniforms.fCameraHeight2.value = cameraHeight2;
 
-        return renderer.render(scene, camera);
+        renderer.render(scene, camera);
 	}
 
     function onWindowResize() {
-		player.updateScale(player.range, $(document).width());
+		player.updateScale(player.range, window.innerWidth);
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
+		controls.handleResize();
         renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
@@ -215,6 +226,7 @@ $(document).ready(function() {
 		if (player.coordinateSystem === 'heliocentric') {
 			elektro1.rotateY(0);
 			elektro2.rotateY(0);
+			spektr.rotateY(0);
 			sun.rotateY(0);
 			controls.object.position.applyAxisAngle(yAxis, angle);
 		}
@@ -229,20 +241,33 @@ $(document).ready(function() {
 		var setCameraTo = $(this).attr('set-camera-to');
 		if (setCameraTo === 'earth') {
 			controls.target = earth.position();
+			controls.minDistance = 200;
+			controls.maxDistance = 1e10;
 			camera.position.set(0, 0, 1250.0);
-		}
-		if (setCameraTo === 'moon') {
-			controls.target = moon.position();
-			camera.position.copy(moon.position()).multiplyScalar(1.1);
 		}
 		if (setCameraTo === 'elektro1') {
 			controls.target = elektro1.object3d.position;
+			controls.minDistance = 20;
+			controls.maxDistance = 1e5;
 			camera.position.copy(elektro1.object3d.position).multiplyScalar(1.1);
 		}
 		if (setCameraTo === 'elektro2') {
 			controls.target = elektro2.object3d.position;
+			controls.minDistance = 20;
+			controls.maxDistance = 1e5;
+			camera.position.copy(elektro2.object3d.position).multiplyScalar(1.1);
+		}
+		if (setCameraTo === 'spektr-r') {
+			controls.target = spektr.object3d.position;
+			controls.minDistance = 20;
+			controls.maxDistance = 1e5;
 			camera.position.copy(elektro2.object3d.position).multiplyScalar(1.1);
 		}
 	};
+
+	function makeSnapshot() {
+		window.open( renderer.domElement.toDataURL("image/jpeg"), "Satellite Tracker");
+		return false;
+	}
 
 });

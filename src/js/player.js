@@ -12,6 +12,7 @@ TRACKER.Player = (function() {
     player.date = null;
     player.play = true;
     player.speed = 1000;
+    player.snapshotCallback = null;
     player.toggleCoordinatesCallback = null;
     player.width = null;
 
@@ -43,6 +44,7 @@ TRACKER.Player = (function() {
         player.onDateChangeCallback = config.onDateChangeCallback || null;
         player.toggleCoordinatesCallback = config.toggleCoordinatesCallback || null;
         player.changeCameraViewCallback = config.changeCameraViewCallback || null;
+        player.snapshotCallback = config.snapshotCallback || null;
 
         player.updateScale(player.range, player.width);
         player.updateDateRange(player.date);
@@ -56,6 +58,7 @@ TRACKER.Player = (function() {
         $('#coordinate_system').click(player.toggleCoordinates);
         $('#camera_view').click(player.showCameraViewPopup);
         $('#camera_view_popup .st-popup-item').click(player.changeCameraViewCallback);
+        $('#snapshot').click(player.snapshotCallback);
 
         $('.st-progress-bar').mousedown(player.onDateClicked)
             .mousemove(player.onDateChange)
@@ -172,7 +175,10 @@ TRACKER.Player = (function() {
 
     function toNow() {
         player.date = new Date();
-        player.updateHover();
+        player.updateDateRange(player.date);
+        if (!player.play && typeof player.onDateChangeCallback === 'function') {
+            player.onDateChangeCallback();
+        }
     }
 
 	function updateDateRange(date) {
@@ -191,6 +197,7 @@ TRACKER.Player = (function() {
 	}
 
     function updateScale(range, width) {
+        player.width = width;
         player.scale = player.range / player.width;
     }
 

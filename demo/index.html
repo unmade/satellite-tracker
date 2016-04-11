@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebGL Earth</title>
+    <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic&subset=latin,cyrillic" rel="stylesheet" type="text/css"> -->
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
     <link href="/dist/roboto-font.min.css" rel="stylesheet"/>
     <link href="/dist/icon-font.min.css" rel="stylesheet"/>
     <link href="/dist/elektro-tracker.min.css" rel="stylesheet"/>
@@ -29,7 +31,7 @@
             <button class="st-icon-button" id="forward">
                 <i class="material-icons">skip_next</i>
             </button>
-            <i id="propagation_date">01.02.2016 00:00:01</i>
+            <i id="propagation_date"></i>
         </div>
 
         <div class="st-settings-controls">
@@ -56,20 +58,20 @@
         <div class="st-popup-arrow"></div>
         <div class="st-popup-content">
             <div class="st-popup-item" set-camera-to="earth">
-                <div><img src="/src/images/space-earth.png" alt="earth" /></div>
+                <div><img src="/dist/images/icons/st-earth.png" alt="earth" /></div>
                 <div><p>Earth</p></div>
             </div>
-            <div class="st-popup-item" set-camera-to="moon">
-                <div><img src="/src/images/space-moon.png" alt="moon" /></div>
-                <div><p>Moon</p></div>
-            </div>
             <div class="st-popup-item" set-camera-to="elektro1">
-                <div><img src="/src/images/space-moon.png" alt="elektro-l 1" /></div>
+                <div><img src="/dist/images/icons/st-elektro-l.png" alt="elektro-l #1" /></div>
                 <div><p>Elektro-L #1</p></div>
             </div>
             <div class="st-popup-item" set-camera-to="elektro2">
-                <div><img src="/src/images/space-moon.png" alt="elektro-l 2" /></div>
+                <div><img src="/dist/images/icons/st-elektro-l.png" alt="elektro-l #2" /></div>
                 <div><p>Elektro-L #2</p></div>
+            </div>
+            <div class="st-popup-item" set-camera-to="spektr-r">
+                <div><img src="/dist/images/icons/st-spektr-r.png" alt="sprekt-r" /></div>
+                <div><p>Spektr-R</p></div>
             </div>
         </div>
     </div>
@@ -358,10 +360,10 @@
 
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="/bower_components/satellite.js/dist/satellite.min.js"></script>
-    <script src="/bower_components/three.r75.min.js"></script>
-    <script src="/bower_components/OBJLoader.js"></script>
-    <script src="/bower_components/MTLLoader.js"></script>
-    <script src="/bower_components/threejs-trackball-controls/TrackballControls.js"></script>
+    <script src="/dist/thirdparty/three.r75.min.js"></script>
+    <script src="/dist/thirdparty/OBJLoader.js"></script>
+    <script src="/dist/thirdparty/MTLLoader.js"></script>
+    <script src="/dist/thirdparty/TrackballControls.js"></script>
     <script src="/dist/elektro-tracker.min.js"></script>
     <script src="/demo/app.js"></script>
 

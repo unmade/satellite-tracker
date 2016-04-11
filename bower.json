@@ -9,7 +9,8 @@
   "keywords": [
     "elektro",
     "elektro-l",
-    "sattelite",
+    "elektro",
+    "satellite",
     "tracking",
     "NORAD",
     "tle",
@@ -26,8 +27,6 @@
   ],
   "dependencies": {
     "satellite.js": "~1.2.0",
-    "three.js": "~0.75.0",
-    "jquery": "~2.1.4",
-    "threejs-trackball-controls": "*"
+    "jquery": "~2.1.4"
   }
 }

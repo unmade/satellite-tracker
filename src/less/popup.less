@@ -9,18 +9,19 @@
     bottom: -5px;
 
     &:before {
-        content:'';
-        display:block;
-        width:0;
-        height:0;
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 5px solid white;
+        border-top: 5px solid rgba(0, 0, 0, 0.4);
     }
 }
 
 .st-popup-content {
-    background-color: white;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #fff;
     border-radius: 3px;
 
 }
@@ -30,7 +31,7 @@
     cursor: pointer;
 
     &:hover {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: rgba(255, 255, 255, 0.15);
     }
 
     div {
