@@ -23,6 +23,43 @@ $(document).ready(function() {
 		}
 	};
 	var paths = {
+	// 	earth: {
+	// 		low: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453924/diffuse-2k_pptb3b.jpg',
+	// 		mid: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453924/diffuse-4k_dxcwpb.jpg',
+	// 		high: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460454270/diffuse-8k-1_diyaii.jpg'
+	// 	},
+	// 	earthNight: {
+	// 		low: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453923/diffuse-night-2k_waymla.jpg',
+	// 		mid: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453924/diffuse-night-4k_bfhlas.jpg',
+	// 		high: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453925/diffuse-night-8k_znszxy.jpg'
+	// 	},
+	// 	earthSpecular: {
+	// 		low: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453925/diffuse-specular-2k_excwc3.png',
+	// 		mid: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453926/diffuse-specular-4k_iqrnyh.png'
+	// 	},
+	// 	lensflare0: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453938/lensflare0_acpml3.png',
+	// 	lensflare2: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453937/lensflare2_txpczc.png',
+	// 	lensflare3: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453937/lensflare3_j13tzs.png',
+	// 	moon: {
+	// 		low: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453942/moon-2k_hczfxp.jpg',
+	// 		mid: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453941/moon-4k_zyrli7.jpg'
+	// 	},
+	// 	moonNight: {
+	// 		low:'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453923/default-night_kuxx0h.jpg'
+	// 	},
+	// 	moonSpecular: {
+	// 		low: 'https://res.cloudinary.com/dqdmb8lkr/image/upload/v1460453922/default-specular_p2h2ew.png'
+	// 	},
+	// 	elektro:  {
+	// 		obj: 'https://raw.githubusercontent.com/unmade/satellite-tracker/master/dist/obj/Aura_27.obj',
+	// 		mtl: 'https://raw.githubusercontent.com/unmade/satellite-tracker/master/dist/obj/Aura_27.mtl'
+	// 	},
+	// 	spektr: {
+	// 		obj: 'https://raw.githubusercontent.com/unmade/satellite-tracker/master/dist/obj/jason-1_final.obj',
+	// 		mtl: 'https://raw.githubusercontent.com/unmade/satellite-tracker/master/dist/obj/jason-1_final.mtl'
+	// 	}
+	// }
+	var paths = {
 		earth: {
 			low: '/dist/images/textures/earth/diffuse-2k.jpg',
 			mid: '/dist/images/textures/earth/diffuse-4k.jpg',

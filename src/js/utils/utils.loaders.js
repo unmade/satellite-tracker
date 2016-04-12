@@ -55,6 +55,7 @@ TRACKER.utils.Loaders = (function() {
     {
         var defer = $.Deferred();
         var loader = new THREE.TextureLoader();
+        loader.crossOrigin = "anonymous";
         loader.load(url, function ( event ) {
             obj[name] = event;
             defer.resolve();
