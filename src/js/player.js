@@ -7,6 +7,7 @@ TRACKER.Player = (function() {
 
     player.onDateChangeCallback = null;
     player.changeCameraViewCallback = null;
+    player.changeTextureResCallback = null;
     player.clicked = false;
     player.coordinateSystem = 'geocentric';
     player.date = null;
@@ -19,13 +20,14 @@ TRACKER.Player = (function() {
     player.init = init;
     player.dateClicked = dateClicked;
     player.forward = forward;
-    player.hideCameraViewPopup = hideCameraViewPopup;
+    player.hidePopup = hidePopup;
     player.hidePrehover = hidePrehover;
     player.onDateChange = onDateChange;
     player.onDateClicked = onDateClicked;
     player.onDateClickedAndMove = onDateClickedAndMove;
+    player.onTextureResChange = onTextureResChange;
     player.rewind = rewind;
-    player.showCameraViewPopup = showCameraViewPopup;
+    player.showPopup = showPopup;
     player.showPrehover = showPrehover;
     player.toggleCoordinates = toggleCoordinates;
     player.togglePlay = togglePlay;
@@ -44,6 +46,7 @@ TRACKER.Player = (function() {
         player.onDateChangeCallback = config.onDateChangeCallback || null;
         player.toggleCoordinatesCallback = config.toggleCoordinatesCallback || null;
         player.changeCameraViewCallback = config.changeCameraViewCallback || null;
+        player.changeTextureResCallback = config.changeTextureResCallback || null;
         player.snapshotCallback = config.snapshotCallback || null;
 
         player.updateScale(player.range, player.width);
@@ -56,8 +59,10 @@ TRACKER.Player = (function() {
         $('#now').click(player.toNow);
         $('#speed').click(player.toggleSpeed);
         $('#coordinate_system').click(player.toggleCoordinates);
-        $('#camera_view').click(player.showCameraViewPopup);
+        $('#camera_view').click(player.showPopup('#camera_view_popup'));
+        $('#hd').click(player.showPopup('#hd_popup'));
         $('#camera_view_popup .st-popup-item').click(player.changeCameraViewCallback);
+        $('#hd_popup .st-popup-item').click(player.onTextureResChange);
         $('#snapshot').click(player.snapshotCallback);
 
         $('.st-progress-bar').mousedown(player.onDateClicked)
@@ -67,7 +72,7 @@ TRACKER.Player = (function() {
 
         $(document).mousemove(player.onDateClickedAndMove)
             .mouseup(player.dateClicked)
-            .mouseup(player.hideCameraViewPopup);
+            .mouseup(player.hidePopup);
 
         return player;
     }
@@ -84,8 +89,8 @@ TRACKER.Player = (function() {
 		}
     }
 
-    function hideCameraViewPopup(e) {
-        var container = $("#camera_view_popup");
+    function hidePopup(e) {
+        var container = $(".st-popup");
 
         if (!container.is(e.target) && container.has(e.target).length === 0) {
             container.hide();
@@ -130,6 +135,14 @@ TRACKER.Player = (function() {
         player.onDateChange(e);
     }
 
+    function onTextureResChange() {
+        var text = $(this).attr('texture-res');
+        $('#hd i').text(text);
+        if (typeof player.changeTextureResCallback === 'function') {
+			player.changeTextureResCallback.apply(this);
+		}
+    }
+
     function rewind() {
 		player.date.setUTCMonth(player.date.getUTCMonth() - 1);
 		player.updateDateRange(player.date);
@@ -138,16 +151,18 @@ TRACKER.Player = (function() {
 		}
 	}
 
-    function showCameraViewPopup() {
-		var popup = $('#camera_view_popup'),
-			cameraView = $('#camera_view'),
-			popupHalfWidth = popup.width() / 2;
+    function showPopup(popupId) {
+        return function() {
+            var popup = $(popupId),
+                cameraView = $(this),
+                popupHalfWidth = popup.width() / 2;
 
-		$('.st-popup-arrow').css({
-			'left': $(document).width() - cameraView.offset().left + cameraView.outerWidth() / 2 - 5
-		});
-		popup.toggle(100);
-	};
+            $('.st-popup-arrow').css({
+                'left': $(document).width() - cameraView.offset().left + cameraView.outerWidth() / 2 - 5
+            });
+            popup.toggle(100);
+        }
+    }
 
     function showPrehover() {
         $('.st-hover-progress').show(100);

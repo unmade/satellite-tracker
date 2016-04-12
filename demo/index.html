@@ -57,6 +57,9 @@
             <button class="st-icon-button" id="camera_view">
                 <i class="material-icons">visibility</i>
             </button>
+            <button class="st-icon-button" id="hd">
+                <i>2k</i>
+            </button>
             <button class="st-icon-button" id="snapshot">
                 <i class="material-icons">photo_camera</i>
             </button>
@@ -86,9 +89,27 @@
         </div>
     </div>
 
+    <div class="st-popup hide" id="hd_popup">
+        <div class="st-popup-arrow"></div>
+        <div class="st-popup-content">
+            <div class="st-popup-item" texture-res="8k">
+                <div><img src="/dist/images/icons/st-8k.png" alt="8k" /></div>
+                <div>8192x4096</div>
+            </div>
+            <div class="st-popup-item" texture-res="4k">
+                <div><img src="/dist/images/icons/st-4k.png" alt="4k" /></div>
+                <div>4096x2048</div>
+            </div>
+            <div class="st-popup-item" texture-res="2k">
+                <div><img src="/dist/images/icons/st-2k.png" alt="2k" /></div>
+                <div>2048x1024</div>
+            </div>
+        </div>
+    </div>
+
 
     <div id="scene"></div>
-    
+
 
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="/bower_components/satellite.js/dist/satellite.min.js"></script>
